@@ -1,0 +1,77 @@
+/* Tablet */
+@media (max-width: 768px) {
+    .header-content {
+        padding: 0 1rem;
+    }
+    
+    .main-content {
+        padding: 0.5rem;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .login-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .header-content {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .navigation {
+        top: 110px;
+    }
+    
+    .nav-text {
+        font-size: 0.7rem;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .visit-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .visit-actions {
+        flex-direction: column;
+    }
+    
+    .btn-sm {
+        width: 100%;
+    }
+}
+
+/* Large screens */
+@media (min-width: 1200px) {
+    .main-content {
+        padding: 2rem 0;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .btn, .nav-item {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .form-control {
+        font-size: 16px; /* iOS zoom önlemi */
+    }
+}
