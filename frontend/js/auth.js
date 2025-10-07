@@ -5,57 +5,34 @@ class AuthManager {
     }
 
     async login(email, password) {
-        try {
-            const response = await fetch(`${app.apiBaseUrl}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message);
-            }
-
+        const response = await fetch('http://localhost:5010/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
             this.token = data.token;
             this.user = data.user;
-
             localStorage.setItem('authToken', this.token);
             localStorage.setItem('user', JSON.stringify(this.user));
-
-            return data;
-        } catch (error) {
-            console.error('Login error:', error);
-            throw error;
         }
+        return data;
     }
 
     async verifyToken() {
         if (!this.token) return false;
-
+        
         try {
-            const response = await fetch(`${app.apiBaseUrl}/auth/verify`, {
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+            const response = await fetch('http://localhost:5010/api/auth/verify', {
+                headers: { 'Authorization': `Bearer ${this.token}` }
             });
-
             const data = await response.json();
-
-            if (data.success) {
-                this.user = data.user;
-                localStorage.setItem('user', JSON.stringify(this.user));
-                return true;
-            }
+            return data.success;
         } catch (error) {
-            console.error('Token verification error:', error);
+            return false;
         }
-
-        this.logout();
-        return false;
     }
 
     logout() {
@@ -63,11 +40,6 @@ class AuthManager {
         this.user = null;
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        window.location.reload();
-    }
-
-    isAuthenticated() {
-        return !!this.token && !!this.user;
     }
 
     getAuthHeaders() {

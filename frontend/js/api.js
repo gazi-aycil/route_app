@@ -1,31 +1,16 @@
 class ApiService {
     constructor() {
-        this.baseUrl = 'https://your-render-app.onrender.com/api';
+        this.baseUrl = 'http://localhost:5010/api';
     }
 
     async request(endpoint, options = {}) {
         const url = `${this.baseUrl}${endpoint}`;
-        const config = {
-            headers: auth.getAuthHeaders(),
-            ...options
-        };
-
-        try {
-            const response = await fetch(url, config);
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || `HTTP error! status: ${response.status}`);
-            }
-
-            return data;
-        } catch (error) {
-            console.error('API request error:', error);
-            throw error;
-        }
+        const config = { headers: auth.getAuthHeaders(), ...options };
+        
+        const response = await fetch(url, config);
+        return await response.json();
     }
 
-    // Visits
     async getVisits() {
         return this.request('/visits');
     }
@@ -47,35 +32,14 @@ class ApiService {
             body: JSON.stringify(visitData)
         });
     }
-
-    async confirmVisit(id, confirmationData) {
-        return this.request(`/visits/${id}/confirm`, {
-            method: 'POST',
-            body: JSON.stringify(confirmationData)
-        });
+     // Müşteri methodları
+     async getCustomers(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request(`/customers?${queryString}`);
     }
 
-    async deleteVisit(id) {
-        return this.request(`/visits/${id}`, {
-            method: 'DELETE'
-        });
-    }
-
-    // Orders
-    async getOrders() {
-        return this.request('/orders');
-    }
-
-    async createOrder(orderData) {
-        return this.request('/orders', {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        });
-    }
-
-    // Customers
-    async getCustomers() {
-        return this.request('/customers');
+    async getCustomer(id) {
+        return this.request(`/customers/${id}`);
     }
 
     async createCustomer(customerData) {
@@ -84,4 +48,26 @@ class ApiService {
             body: JSON.stringify(customerData)
         });
     }
+
+    async updateCustomer(id, customerData) {
+        return this.request(`/customers/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(customerData)
+        });
+    }
+
+    async deleteCustomer(id) {
+        return this.request(`/customers/${id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    async getCustomerStats(id) {
+        return this.request(`/customers/${id}/stats`);
+    }
+
+    async searchCustomers(query) {
+        return this.request(`/customers/search/quick?q=${encodeURIComponent(query)}`);
+    }
 }
+
