@@ -5,7 +5,7 @@ class AuthManager {
     }
 
     async login(email, password) {
-        const response = await fetch('http://localhost:5010/api/auth/login', {
+        const response = await fetch('https://route-app.onrender.com/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -25,7 +25,7 @@ class AuthManager {
         if (!this.token) return false;
         
         try {
-            const response = await fetch('http://localhost:5010/api/auth/verify', {
+            const response = await fetch('https://route-app.onrender.com/api/auth/verify', {
                 headers: { 'Authorization': `Bearer ${this.token}` }
             });
             const data = await response.json();
