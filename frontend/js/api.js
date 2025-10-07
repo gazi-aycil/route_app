@@ -1,6 +1,6 @@
 class ApiService {
     constructor() {
-        this.baseUrl = 'http://localhost:5010/api';
+        this.baseUrl = 'https://route-app.onrender.com/api';
     }
 
     async request(endpoint, options = {}) {
