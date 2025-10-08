@@ -1,72 +1,90 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 const router = express.Router();
 
 // Geçici user storage (MongoDB bağlantısı yoksa kullanılacak)
 let temporaryUsers = [];
 
-// CORS preflight için özel handler
-router.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+// Tüm route'lar için CORS headers - ÖNEMLİ
+router.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://octo-route.netlify.app',
+    'http://localhost:3000', 
+    'http://localhost:5173'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.header('Access-Control-Allow-Credentials', 'true');
+  
+  next();
+});
+
+// OPTIONS istekleri için özel handler - KRİTİK
+router.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.status(200).send();
 });
 
 // Helper function to find user
 const findUser = async (email) => {
   try {
-    // Önce MongoDB'de ara
-    if (mongoose.connection.readyState === 1) {
+    // MongoDB bağlıysa kullan
+    if (mongoose && mongoose.connection && mongoose.connection.readyState === 1) {
+      const User = require('../models/User');
       const user = await User.findOne({ email });
       if (user) return user;
     }
-    
-    // MongoDB'de yoksa temporary storage'da ara
-    return temporaryUsers.find(u => u.email === email);
   } catch (error) {
-    // MongoDB hatasında temporary storage'a dön
-    return temporaryUsers.find(u => u.email === email);
+    console.log('MongoDB not available, using temporary storage');
   }
+  
+  // Temporary storage'da ara
+  return temporaryUsers.find(u => u.email === email);
 };
 
 // Helper function to create user
 const createUser = async (userData) => {
   try {
-    // Önce MongoDB'ye kaydet
-    if (mongoose.connection.readyState === 1) {
+    // MongoDB bağlıysa kullan
+    if (mongoose && mongoose.connection && mongoose.connection.readyState === 1) {
+      const User = require('../models/User');
       const user = new User(userData);
       await user.save();
       return user;
     }
-    
-    // MongoDB yoksa temporary storage'a kaydet
-    const user = {
-      _id: Date.now().toString(),
-      ...userData,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    temporaryUsers.push(user);
-    return user;
   } catch (error) {
-    // MongoDB hatasında temporary storage'a kaydet
-    const user = {
-      _id: Date.now().toString(),
-      ...userData,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    temporaryUsers.push(user);
-    return user;
+    console.log('MongoDB not available, using temporary storage');
   }
+  
+  // Temporary storage'a kaydet
+  const user = {
+    _id: Date.now().toString(),
+    ...userData,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  temporaryUsers.push(user);
+  return user;
 };
 
 // Login endpoint
 router.post('/login', async (req, res) => {
+  console.log('Login request received:', { 
+    email: req.body.email,
+    origin: req.headers.origin,
+    method: req.method 
+  });
+
   try {
     const { email, password } = req.body;
 
@@ -103,9 +121,11 @@ router.post('/login', async (req, res) => {
         email: user.email,
         name: user.name 
       },
-      process.env.JWT_SECRET || 'fallback_secret_key_2024_octo_route',
+      process.env.JWT_SECRET || 'fallback_secret_key_2024_octo_route_render',
       { expiresIn: '24h' }
     );
+
+    console.log('Login successful for user:', email);
 
     // Send success response
     res.status(200).json({
@@ -123,13 +143,20 @@ router.post('/login', async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ 
       message: 'Server error during login',
-      success: false
+      success: false,
+      error: process.env.NODE_ENV === 'production' ? undefined : error.message
     });
   }
 });
 
 // Register endpoint
 router.post('/register', async (req, res) => {
+  console.log('Register request received:', {
+    name: req.body.name,
+    email: req.body.email,
+    origin: req.headers.origin
+  });
+
   try {
     const { name, email, password } = req.body;
 
@@ -175,9 +202,11 @@ router.post('/register', async (req, res) => {
         email: newUser.email,
         name: newUser.name 
       },
-      process.env.JWT_SECRET || 'fallback_secret_key_2024_octo_route',
+      process.env.JWT_SECRET || 'fallback_secret_key_2024_octo_route_render',
       { expiresIn: '24h' }
     );
+
+    console.log('Registration successful for user:', email);
 
     // Send success response
     res.status(201).json({
@@ -195,7 +224,8 @@ router.post('/register', async (req, res) => {
     console.error('Registration error:', error);
     res.status(500).json({ 
       message: 'Server error during registration',
-      success: false
+      success: false,
+      error: process.env.NODE_ENV === 'production' ? undefined : error.message
     });
   }
 });
@@ -212,7 +242,7 @@ router.post('/verify', async (req, res) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_2024_octo_route');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_2024_octo_route_render');
     
     // Find user to make sure they still exist
     const user = await findUser(decoded.email);
@@ -239,6 +269,14 @@ router.post('/verify', async (req, res) => {
       message: 'Invalid token'
     });
   }
+});
+
+// Get all users (for testing)
+router.get('/users', (req, res) => {
+  res.status(200).json({
+    users: temporaryUsers.map(u => ({ id: u._id, name: u.name, email: u.email })),
+    count: temporaryUsers.length
+  });
 });
 
 module.exports = router;
