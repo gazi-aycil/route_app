@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth Test</title>
+    <style>
+        .container { max-width: 400px; margin: 50px auto; padding: 20px; }
+        .form-group { margin: 10px 0; }
+        input { width: 100%; padding: 8px; margin: 5px 0; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; }
+        .error { color: red; margin: 10px 0; }
+        .debug { background: #f5f5f5; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Auth Test</h1>
+        
+        <div class="debug">
+            <strong>Debug Info:</strong>
+            <div id="debugInfo">Loading...</div>
+        </div>
+
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Email" value="test@example.com" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Password" value="password123" required>
+            </div>
+            <button type="submit" id="loginBtn">Login</button>
+            <div id="loginError" class="error" style="display: none;"></div>
+        </form>
+
+        <hr>
+
+        <h2>Register</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <input type="text" id="regName" placeholder="Name" value="Test User" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="regEmail" placeholder="Email" value="test2@example.com" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="regPassword" placeholder="Password" value="password123" required>
+            </div>
+            <button type="submit" id="registerBtn">Register</button>
+            <div id="registerError" class="error" style="display: none;"></div>
+        </form>
+
+        <hr>
+        
+        <button onclick="testAuthManager()">Test AuthManager</button>
+        <button onclick="clearStorage()">Clear Storage</button>
+    </div>
+
+    <!-- ÖNCE auth.js, SONRA app.js -->
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        // Debug info güncelle
+        function updateDebugInfo() {
+            const authManager = window.authManager;
+            const debugInfo = document.getElementById('debugInfo');
+            
+            if (authManager) {
+                debugInfo.innerHTML = `
+                    baseURL: ${authManager.baseURL}<br>
+                    isAuthenticated: ${authManager.isAuthenticated()}<br>
+                    token: ${authManager.token ? '✓' : '✗'}<br>
+                    user: ${authManager.user ? authManager.user.email : 'null'}
+                `;
+            } else {
+                debugInfo.innerHTML = 'authManager not found!';
+            }
+        }
+
+        // Test fonksiyonu
+        function testAuthManager() {
+            const authManager = window.authManager;
+            if (authManager) {
+                console.log('🔍 AuthManager test:');
+                console.log('baseURL:', authManager.baseURL);
+                console.log('token:', authManager.token);
+                console.log('user:', authManager.user);
+                console.log('isAuthenticated:', authManager.isAuthenticated());
+                
+                alert('Check console for AuthManager details');
+            } else {
+                alert('authManager not found! Check script loading order.');
+            }
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            window.location.reload();
+        }
+
+        // Sayfa yüklendiğinde debug info'yu güncelle
+        document.addEventListener('DOMContentLoaded', () => {
+            setInterval(updateDebugInfo, 1000);
+            console.log('✅ Test page loaded');
+            console.log('🔗 Backend URL should be: https://route-app.onrender.com/api');
+        });
+    </script>
+</body>
+</html>

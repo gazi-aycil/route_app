@@ -1,67 +1,67 @@
+// app.js
 class SahaSatisApp {
     constructor() {
-      this.authManager = authManager;
+      this.authManager = window.authManager; // Global instance kullan
       this.init();
     }
   
     init() {
-      this.checkAuthStatus();
+      console.log('🔄 App initializing...');
       this.attachEventListeners();
+      this.checkAuth();
     }
   
     attachEventListeners() {
       const loginForm = document.getElementById('loginForm');
       if (loginForm) {
         loginForm.onsubmit = (e) => this.handleLogin(e);
+        console.log('✅ Login form attached');
       }
   
       const registerForm = document.getElementById('registerForm');
       if (registerForm) {
         registerForm.onsubmit = (e) => this.handleRegister(e);
-      }
-  
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.onclick = () => this.handleLogout();
+        console.log('✅ Register form attached');
       }
     }
   
     async handleLogin(event) {
       event.preventDefault();
+      console.log('🔄 Login process starting...');
       
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const loginBtn = document.getElementById('loginBtn');
       const errorDiv = document.getElementById('loginError');
   
-      // Reset error message
-      if (errorDiv) {
-        errorDiv.textContent = '';
-        errorDiv.style.display = 'none';
-      }
-  
-      // Show loading state
+      // Loading state
       if (loginBtn) {
         loginBtn.disabled = true;
         loginBtn.textContent = 'Logging in...';
+      }
+  
+      // Clear previous errors
+      if (errorDiv) {
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
       }
   
       try {
         const result = await this.authManager.login(email, password);
         
         if (result.success) {
-          this.showMessage('Login successful!', 'success');
-          setTimeout(() => {
-            window.location.href = '/dashboard.html';
-          }, 1000);
+          console.log('🎉 Login successful, redirecting...');
+          alert('Login successful!');
+          // window.location.href = '/dashboard.html';
         } else {
+          console.error('💥 Login failed:', result.error);
           this.showError(result.error, errorDiv);
         }
       } catch (error) {
-        console.error('Login handler error:', error);
-        this.showError('An unexpected error occurred. Please try again.', errorDiv);
+        console.error('💥 Login handler error:', error);
+        this.showError('An unexpected error occurred', errorDiv);
       } finally {
-        // Reset button state
+        // Reset button
         if (loginBtn) {
           loginBtn.disabled = false;
           loginBtn.textContent = 'Login';
@@ -71,6 +71,7 @@ class SahaSatisApp {
   
     async handleRegister(event) {
       event.preventDefault();
+      console.log('🔄 Register process starting...');
       
       const name = document.getElementById('regName').value;
       const email = document.getElementById('regEmail').value;
@@ -78,47 +79,39 @@ class SahaSatisApp {
       const registerBtn = document.getElementById('registerBtn');
       const errorDiv = document.getElementById('registerError');
   
-      // Reset error message
-      if (errorDiv) {
-        errorDiv.textContent = '';
-        errorDiv.style.display = 'none';
-      }
-  
-      // Show loading state
+      // Loading state
       if (registerBtn) {
         registerBtn.disabled = true;
         registerBtn.textContent = 'Registering...';
+      }
+  
+      // Clear previous errors
+      if (errorDiv) {
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
       }
   
       try {
         const result = await this.authManager.register(name, email, password);
         
         if (result.success) {
-          this.showMessage('Registration successful!', 'success');
-          setTimeout(() => {
-            window.location.href = '/dashboard.html';
-          }, 1000);
+          console.log('🎉 Registration successful, redirecting...');
+          alert('Registration successful!');
+          // window.location.href = '/dashboard.html';
         } else {
+          console.error('💥 Registration failed:', result.error);
           this.showError(result.error, errorDiv);
         }
       } catch (error) {
-        console.error('Registration handler error:', error);
-        this.showError('An unexpected error occurred. Please try again.', errorDiv);
+        console.error('💥 Registration handler error:', error);
+        this.showError('An unexpected error occurred', errorDiv);
       } finally {
-        // Reset button state
+        // Reset button
         if (registerBtn) {
           registerBtn.disabled = false;
           registerBtn.textContent = 'Register';
         }
       }
-    }
-  
-    handleLogout() {
-      this.authManager.logout();
-      this.showMessage('Logged out successfully!', 'success');
-      setTimeout(() => {
-        window.location.href = '/index.html';
-      }, 1000);
     }
   
     showError(message, errorElement = null) {
@@ -130,21 +123,21 @@ class SahaSatisApp {
       }
     }
   
-    showMessage(message, type = 'info') {
-      // Implement your notification system here
-      console.log(`${type.toUpperCase()}: ${message}`);
-      alert(message); // Temporary solution
-    }
-  
-    checkAuthStatus() {
-      if (this.authManager.isAuthenticated() && 
-          !window.location.pathname.includes('/dashboard.html')) {
-        window.location.href = '/dashboard.html';
+    checkAuth() {
+      if (this.authManager.isAuthenticated()) {
+        console.log('🔐 User is authenticated');
+        // Giriş yapılmışsa dashboard'a yönlendir
+        // if (!window.location.pathname.includes('/dashboard.html')) {
+        //   window.location.href = '/dashboard.html';
+        // }
+      } else {
+        console.log('🔓 User is not authenticated');
       }
     }
   }
   
-  // Initialize app when DOM is loaded
+  // App başlatma
   document.addEventListener('DOMContentLoaded', () => {
-    new SahaSatisApp();
+    console.log('📄 DOM loaded, starting app...');
+    window.app = new SahaSatisApp();
   });
