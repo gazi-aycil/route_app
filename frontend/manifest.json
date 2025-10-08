@@ -1,10 +1,12 @@
 {
-    "name": "Saha Satış",
+    "name": "Saha Satış Uygulaması",
     "short_name": "SahaSatis",
+    "description": "Saha satış ekipleri için mobil uygulama",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#4CAF50",
+    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "images/icon-192.png",
@@ -16,5 +18,7 @@
             "sizes": "512x512",
             "type": "image/png"
         }
-    ]
+    ],
+    "categories": ["business", "productivity"],
+    "lang": "tr"
 }
