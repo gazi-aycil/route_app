@@ -1,131 +1,78 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const mongoose = require('mongoose');
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const routeRoutes = require('./routes/routes');
 
 const app = express();
 
-// Middleware
+// CORS Middleware - GÜNCELLENMİŞ
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-    credentials: true
+  origin: [
+    'https://octo-route.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Preflight istekleri için özel handler
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(200).send();
+});
+
+// Body parser middleware
 app.use(express.json());
-
-// MongoDB bağlantısı - GÜNCELLENDİ
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB bağlantısı başarılı'))
-.catch(err => {
-    console.log('❌ MongoDB bağlantı hatası:', err.message);
-    process.exit(1);
-});
-
-// MongoDB bağlantı event'leri
-mongoose.connection.on('connected', () => {
-    console.log('📊 MongoDB veritabanına bağlandı');
-});
-
-mongoose.connection.on('error', (err) => {
-    console.log('❌ MongoDB bağlantı hatası:', err);
-});
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/routes', routeRoutes);
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/visits', require('./routes/visits'));
-app.use('/api/customers', require('./routes/customers')); // YENİ
-//app.use('/api/orders', require('./routes/orders'));
-
-
-// Test route - test kullanıcısı oluştur
-app.post('/api/create-test-user', async (req, res) => {
-    try {
-        const User = require('./models/User');
-        
-        // Önce kullanıcı var mı kontrol et
-        const existingUser = await User.findOne({ email: 'test@test.com' });
-        if (existingUser) {
-            return res.json({ 
-                success: true, 
-                message: 'Test kullanıcısı zaten var: test@test.com / 123456' 
-            });
-        }
-
-        const testUser = new User({
-            name: 'Test Kullanıcı',
-            email: 'test@test.com',
-            password: '123456',
-            role: 'sales_person'
-        });
-        await testUser.save();
-        res.json({ 
-            success: true, 
-            message: 'Test kullanıcısı oluşturuldu: test@test.com / 123456' 
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// Tüm kullanıcıları listele (test için)
-app.get('/api/users', async (req, res) => {
-    try {
-        const User = require('./models/User');
-        const users = await User.find().select('-password');
-        res.json({ success: true, data: users });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// Tüm ziyaretleri listele (test için)
-app.get('/api/all-visits', async (req, res) => {
-    try {
-        const Visit = require('./models/Visit');
-        const visits = await Visit.find().populate('salesPerson', 'name email');
-        res.json({ success: true, data: visits });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-
-// Health check - MongoDB durumunu da göster
+// Health check endpoint
 app.get('/api/health', (req, res) => {
-    const dbStatus = mongoose.connection.readyState;
-    const statusMap = {
-        0: 'disconnected',
-        1: 'connected', 
-        2: 'connecting',
-        3: 'disconnecting'
-    };
-    
-    res.json({ 
-        status: 'OK', 
-        message: 'Backend çalışıyor!',
-        database: statusMap[dbStatus],
-        timestamp: new Date().toISOString()
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'production' ? {} : err.message
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/routeapp';
+
+mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log('MongoDB connected successfully');
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
-});
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-    console.log(`🚀 Backend http://localhost:${PORT} adresinde çalışıyor`);
-    console.log(`📊 MongoDB durumu: ${mongoose.connection.readyState === 1 ? 'Bağlı' : 'Bağlı değil'}`);
-});
-// Debug routes (sadece development'ta)
-if (process.env.NODE_ENV === 'development') {
-    app.use('/api/debug', require('./routes/debug'));
-
-}
-if (process.env.NODE_ENV === 'development') {
-    app.use('/api/fix', require('./routes/fix-coordinates'));
-}
-if (process.env.NODE_ENV === 'development') {
-    app.use('/api/debug', require('./routes/debug'));
-    app.use('/api/fix', require('./routes/fix-coordinates'));
-    
-    console.log('🔧 Debug routes aktif: /api/debug, /api/fix');
-}
+module.exports = app;
