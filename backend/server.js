@@ -2,12 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const routeRoutes = require('./routes/routes');
 
 const app = express();
 
-// CORS Middleware - GÜNCELLENMİŞ
+// CORS Middleware
 app.use(cors({
   origin: [
     'https://octo-route.netlify.app',
@@ -32,10 +30,8 @@ app.options('*', (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Routes - sadece auth route'u
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/routes', routeRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -43,6 +39,14 @@ app.get('/api/health', (req, res) => {
     status: 'OK', 
     message: 'Server is running',
     timestamp: new Date().toISOString()
+  });
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.status(200).json({ 
+    message: 'API is working!',
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -63,16 +67,22 @@ app.use('*', (req, res) => {
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/routeapp';
 
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    console.log('MongoDB connected successfully');
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+// MongoDB connection (optional - eğer MongoDB kullanmak istemiyorsanız bu kısmı kaldırabilirsiniz)
+if (MONGODB_URI && !MONGODB_URI.includes('localhost')) {
+  mongoose.connect(MONGODB_URI)
+    .then(() => {
+      console.log('MongoDB connected successfully');
+    })
+    .catch(err => {
+      console.error('MongoDB connection error:', err);
     });
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
-  });
+} else {
+  console.log('MongoDB connection skipped - using in-memory storage');
+}
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
+});
 
 module.exports = app;
