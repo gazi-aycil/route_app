@@ -78,7 +78,7 @@ const createUser = async (userData) => {
 };
 
 // Login endpoint
-router.post('/login', async (req, res) => {
+router.get('/login', async (req, res) => {
   console.log('Login request received:', { 
     email: req.body.email,
     origin: req.headers.origin,
