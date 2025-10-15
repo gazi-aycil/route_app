@@ -3,22 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Route App - Saha Satış</title>
-    <meta name="description" content="Saha satış ekipleri için mobil uygulama">
+    <title>Route App - Giriş</title>
     <meta name="theme-color" content="#4CAF50">
-    
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="images/icon-192.png">
-    
-    <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_KEY&libraries=geometry,places"></script>
-    
-    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-    
     <style>
-        .login-background {
+        .login-container {
             background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
             min-height: 100vh;
             display: flex;
@@ -26,330 +15,117 @@
             justify-content: center;
             padding: 1rem;
         }
-        
-        .login-container {
+        .login-box {
             background: white;
-            border-radius: 15px;
+            padding: 2rem;
+            border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            padding: 2.5rem;
             width: 100%;
             max-width: 400px;
-            animation: slideUp 0.5s ease-out;
         }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .login-logo {
+        .login-title {
             text-align: center;
             margin-bottom: 2rem;
-        }
-        
-        .login-logo h1 {
             color: #333;
-            margin: 0;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
         }
-        
-        .login-subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 1rem;
-        }
-        
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #333;
-        }
-        
         .form-control {
             width: 100%;
-            padding: 0.8rem 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
         }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #4CAF50;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-        
-        .btn-login {
+        .btn {
             width: 100%;
-            padding: 0.8rem 1.5rem;
+            padding: 0.8rem;
             background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 5px;
             font-size: 1rem;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
         }
-        
-        .btn-login:hover {
+        .btn:hover {
             background: #45a049;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
         }
-        
-        .btn-login:active {
-            transform: translateY(0);
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e0e0e0;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.9);
+        .message {
+            padding: 0.8rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
             display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
         }
-        
-        .loading-spinner {
-            text-align: center;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4CAF50;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-message {
+        .error {
             background: #ffebee;
             color: #f44336;
-            padding: 0.8rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid #f44336;
-            display: none;
+            border: 1px solid #f44336;
         }
-        
-        .success-message {
+        .success {
             background: #e8f5e8;
             color: #4CAF50;
-            padding: 0.8rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid #4CAF50;
-            display: none;
+            border: 1px solid #4CAF50;
         }
-        
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 2rem 1.5rem;
-                margin: 1rem;
-            }
-            
-            .login-background {
-                padding: 0.5rem;
-            }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
         }
     </style>
 </head>
 <body>
-    <div class="login-background">
-        <div class="login-container">
-            <div class="login-logo">
-                <h1>🏢 Route App</h1>
-            </div>
+    <div class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">🏢 Route App</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 2rem;">Saha satış yönetimi</p>
             
-            <p class="login-subtitle">Saha satış ekipleri için mobil uygulama</p>
-            
-            <div id="errorMessage" class="error-message"></div>
-            <div id="successMessage" class="success-message"></div>
+            <div id="message" class="message"></div>
+            <div id="loading" class="loading">⏳ Yükleniyor...</div>
             
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="email">📧 E-posta Adresi</label>
-                    <input type="email" id="email" class="form-control" 
-                           placeholder="test@test.com" required autocomplete="email">
+                    <input type="email" id="email" class="form-control" placeholder="E-posta" value="test@test.com" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="password">🔐 Şifre</label>
-                    <input type="password" id="password" class="form-control" 
-                           placeholder="123456" required autocomplete="current-password">
+                    <input type="password" id="password" class="form-control" placeholder="Şifre" value="123456" required>
                 </div>
-                
-                <button type="submit" class="btn-login" id="loginButton">
-                    🚀 Giriş Yap
-                </button>
+                <button type="submit" class="btn">🚀 Giriş Yap</button>
             </form>
             
-            <div class="login-footer">
-                <p>© 2024 Route App - Saha Satış</p>
-                <p id="apiStatus" style="font-size: 0.8rem; color: #999; margin-top: 0.5rem;"></p>
-            </div>
+            <div id="status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #666;"></div>
         </div>
     </div>
 
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Giriş yapılıyor...</p>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
     <script>
-        // API URL - PRODUCTION - KESİN URL
-        const API_BASE_URL = 'https://route-app.onrender.com';
+        const API_URL = 'https://route-app.onrender.com';
         
-        console.log('🎯 Route App Frontend başlatılıyor...');
-        console.log('📍 API URL:', API_BASE_URL);
-
-        // DOM Elements
-        const loginForm = document.getElementById('loginForm');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const loginButton = document.getElementById('loginButton');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const errorMessage = document.getElementById('errorMessage');
-        const successMessage = document.getElementById('successMessage');
-        const apiStatus = document.getElementById('apiStatus');
-
-        // Backend connection test
-        async function checkBackendConnection() {
+        async function checkBackend() {
             try {
-                apiStatus.textContent = 'Backend bağlantısı kontrol ediliyor...';
-                console.log('🔍 Testing backend:', `${API_BASE_URL}/api/health`);
-                
-                const response = await fetch(`${API_BASE_URL}/api/health`);
+                document.getElementById('status').textContent = 'Backend kontrol ediliyor...';
+                const response = await fetch(`${API_URL}/api/health`);
                 const data = await response.json();
-                
-                console.log('✅ Backend response:', data);
-                
-                if (data.status === 'OK') {
-                    apiStatus.textContent = '✅ Backend bağlantısı başarılı';
-                    apiStatus.style.color = '#4CAF50';
-                    return true;
-                } else {
-                    apiStatus.textContent = '❌ Backend bağlantı hatası';
-                    apiStatus.style.color = '#f44336';
-                    return false;
-                }
+                document.getElementById('status').textContent = '✅ Backend bağlantısı başarılı';
+                document.getElementById('status').style.color = '#4CAF50';
             } catch (error) {
-                console.error('❌ Backend connection error:', error);
-                apiStatus.textContent = '❌ Backend bağlantı hatası: ' + error.message;
-                apiStatus.style.color = '#f44336';
-                return false;
+                document.getElementById('status').textContent = '❌ Backend bağlantı hatası';
+                document.getElementById('status').style.color = '#f44336';
             }
         }
-
-        // Show message
-        function showMessage(message, type = 'error') {
-            if (type === 'error') {
-                errorMessage.textContent = message;
-                errorMessage.style.display = 'block';
-                successMessage.style.display = 'none';
-            } else {
-                successMessage.textContent = message;
-                successMessage.style.display = 'block';
-                errorMessage.style.display = 'none';
-            }
-            
-            if (type === 'success') {
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // Hide all messages
-        function hideMessages() {
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-        }
-
-        // Show loading
-        function showLoading() {
-            loadingOverlay.style.display = 'flex';
-            loginButton.disabled = true;
-            loginButton.innerHTML = '⏳ Giriş Yapılıyor...';
-        }
-
-        // Hide loading
-        function hideLoading() {
-            loadingOverlay.style.display = 'none';
-            loginButton.disabled = false;
-            loginButton.innerHTML = '🚀 Giriş Yap';
-        }
-
-        // Handle login
-        async function handleLogin(event) {
+        
+        async function login(event) {
             event.preventDefault();
             
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const message = document.getElementById('message');
+            const loading = document.getElementById('loading');
             
-            // Validation
-            if (!email || !password) {
-                showMessage('Lütfen e-posta ve şifre giriniz.');
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showMessage('Lütfen geçerli bir e-posta adresi giriniz.');
-                return;
-            }
-            
-            hideMessages();
-            showLoading();
+            message.style.display = 'none';
+            loading.style.display = 'block';
             
             try {
-                console.log('🚀 Login attempt to:', `${API_BASE_URL}/api/auth/login`);
-                console.log('📧 Credentials:', { email, password: '***' });
-                
-                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -357,103 +133,35 @@
                     body: JSON.stringify({ email, password })
                 });
                 
-                console.log('📨 Login response status:', response.status);
                 const data = await response.json();
-                console.log('📨 Login response data:', data);
                 
                 if (data.success) {
-                    showMessage('✅ Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+                    message.textContent = '✅ Giriş başarılı!';
+                    message.className = 'message success';
+                    message.style.display = 'block';
                     
-                    // Store auth data
-                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    // Redirect to app after short delay
                     setTimeout(() => {
                         window.location.href = 'app.html';
                     }, 1000);
-                    
                 } else {
-                    showMessage(data.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
+                    message.textContent = '❌ ' + data.message;
+                    message.className = 'message error';
+                    message.style.display = 'block';
                 }
-                
             } catch (error) {
-                console.error('❌ Login error:', error);
-                showMessage('❌ Sunucu hatası: ' + error.message);
+                message.textContent = '❌ Sunucu hatası: ' + error.message;
+                message.className = 'message error';
+                message.style.display = 'block';
             } finally {
-                hideLoading();
+                loading.style.display = 'none';
             }
         }
-
-        // Email validation
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        // Check if already logged in
-        function checkExistingAuth() {
-            const token = localStorage.getItem('authToken');
-            const user = localStorage.getItem('user');
-            
-            if (token && user) {
-                showMessage('ℹ️ Oturumunuz açık. Kontrol ediliyor...', 'success');
-                verifyToken(token);
-            }
-        }
-
-        // Verify existing token
-        async function verifyToken(token) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showMessage('✅ Oturumunuz devam ediyor. Yönlendiriliyorsunuz...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'app.html';
-                    }, 1000);
-                } else {
-                    localStorage.removeItem('authToken');
-                    localStorage.removeItem('user');
-                }
-            } catch (error) {
-                console.error('Token verification error:', error);
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('user');
-            }
-        }
-
-        // Event listeners
-        loginForm.addEventListener('submit', handleLogin);
-
-        // Input event to hide messages when user starts typing
-        emailInput.addEventListener('input', hideMessages);
-        passwordInput.addEventListener('input', hideMessages);
-
-        // Enter key support
-        passwordInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                handleLogin(event);
-            }
-        });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎯 DOM loaded, checking backend...');
-            checkBackendConnection();
-            checkExistingAuth();
-            
-            // Auto-fill test credentials
-            emailInput.value = 'test@test.com';
-            passwordInput.value = '123456';
-        });
+        
+        document.getElementById('loginForm').addEventListener('submit', login);
+        checkBackend();
     </script>
 </body>
 </html>

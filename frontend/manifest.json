@@ -1,12 +1,11 @@
 {
-    "name": "Saha Satış Uygulaması",
-    "short_name": "SahaSatis",
-    "description": "Saha satış ekipleri için mobil uygulama",
+    "name": "Route App",
+    "short_name": "RouteApp",
+    "description": "Saha satış yönetim uygulaması",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#4CAF50",
-    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "images/icon-192.png",
@@ -18,7 +17,5 @@
             "sizes": "512x512",
             "type": "image/png"
         }
-    ],
-    "categories": ["business", "productivity"],
-    "lang": "tr"
+    ]
 }

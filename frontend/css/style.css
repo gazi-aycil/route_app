@@ -592,3 +592,20 @@ main {
         justify-content: flex-start;
     }
 }
+/* Genel stiller */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav {
+        flex-direction: column;
+    }
+    
+    .main {
+        padding: 0.5rem;
+    }
+}
