@@ -3,165 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Route App - Giriş</title>
-    <meta name="theme-color" content="#4CAF50">
-    <link rel="stylesheet" href="css/style.css">
+    <title>Route App</title>
     <style>
-        .login-container {
+        body {
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
         }
         .login-box {
             background: white;
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            width: 100%;
+            width: 90%;
             max-width: 400px;
         }
-        .login-title {
+        h1 {
             text-align: center;
-            margin-bottom: 2rem;
             color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
         }
         .form-group {
             margin-bottom: 1rem;
         }
-        .form-control {
+        input {
             width: 100%;
-            padding: 0.8rem;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 1rem;
+            font-size: 16px;
+            box-sizing: border-box;
         }
-        .btn {
+        button {
             width: 100%;
-            padding: 0.8rem;
+            padding: 12px;
             background: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
-            font-size: 1rem;
+            font-size: 16px;
             cursor: pointer;
+            margin-top: 1rem;
         }
-        .btn:hover {
+        button:hover {
             background: #45a049;
         }
         .message {
-            padding: 0.8rem;
+            padding: 10px;
             border-radius: 5px;
-            margin-bottom: 1rem;
+            margin: 10px 0;
             display: none;
         }
         .error {
             background: #ffebee;
-            color: #f44336;
+            color: #d32f2f;
             border: 1px solid #f44336;
         }
         .success {
             background: #e8f5e8;
-            color: #4CAF50;
+            color: #2e7d32;
             border: 1px solid #4CAF50;
         }
-        .loading {
-            display: none;
+        .status {
             text-align: center;
-            margin: 1rem 0;
+            margin: 10px 0;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <h1 class="login-title">🏢 Route App</h1>
-            <p style="text-align: center; color: #666; margin-bottom: 2rem;">Saha satış yönetimi</p>
-            
-            <div id="message" class="message"></div>
-            <div id="loading" class="loading">⏳ Yükleniyor...</div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <input type="email" id="email" class="form-control" placeholder="E-posta" value="test@test.com" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="password" class="form-control" placeholder="Şifre" value="123456" required>
-                </div>
-                <button type="submit" class="btn">🚀 Giriş Yap</button>
-            </form>
-            
-            <div id="status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #666;"></div>
-        </div>
+    <div class="login-box">
+        <h1>🏢 Route App</h1>
+        <p class="subtitle">Saha Satış Yönetimi</p>
+        
+        <div id="message" class="message"></div>
+        <div id="status" class="status"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="email" id="email" placeholder="E-posta" value="test@test.com" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Şifre" value="123456" required>
+            </div>
+            <button type="submit">🚀 Giriş Yap</button>
+        </form>
     </div>
 
     <script>
+        // BACKEND URL - KESİN
         const API_URL = 'https://route-app.onrender.com';
         
-        async function checkBackend() {
+        // Backend bağlantı testi
+        async function testBackend() {
+            const status = document.getElementById('status');
+            status.textContent = 'Backend test ediliyor...';
+            status.style.color = '#FF9800';
+            
             try {
-                document.getElementById('status').textContent = 'Backend kontrol ediliyor...';
-                const response = await fetch(`${API_URL}/api/health`);
+                console.log('🔄 Backend test ediliyor:', API_URL + '/api/health');
+                
+                const response = await fetch(API_URL + '/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+                
+                console.log('📨 Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
                 const data = await response.json();
-                document.getElementById('status').textContent = '✅ Backend bağlantısı başarılı';
-                document.getElementById('status').style.color = '#4CAF50';
+                console.log('✅ Backend cevabı:', data);
+                
+                status.textContent = '✅ Backend bağlantısı başarılı';
+                status.style.color = '#4CAF50';
+                return true;
+                
             } catch (error) {
-                document.getElementById('status').textContent = '❌ Backend bağlantı hatası';
-                document.getElementById('status').style.color = '#f44336';
+                console.error('❌ Backend hatası:', error);
+                status.textContent = '❌ Backend hatası: ' + error.message;
+                status.style.color = '#f44336';
+                return false;
             }
         }
         
-        async function login(event) {
+        // Login işlemi
+        async function handleLogin(event) {
             event.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const message = document.getElementById('message');
-            const loading = document.getElementById('loading');
+            const button = event.target.querySelector('button');
             
             message.style.display = 'none';
-            loading.style.display = 'block';
+            button.disabled = true;
+            button.textContent = '⏳ Giriş yapılıyor...';
             
             try {
-                const response = await fetch(`${API_URL}/api/auth/login`, {
+                console.log('🚀 Login denemesi:', { email, password: '***' });
+                
+                const response = await fetch(API_URL + '/api/auth/login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password }),
+                    mode: 'cors'
                 });
                 
-                const data = await response.json();
+                console.log('📨 Login response status:', response.status);
                 
-                if (data.success) {
-                    message.textContent = '✅ Giriş başarılı!';
-                    message.className = 'message success';
-                    message.style.display = 'block';
-                    
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    
-                    setTimeout(() => {
-                        window.location.href = 'app.html';
-                    }, 1000);
-                } else {
-                    message.textContent = '❌ ' + data.message;
-                    message.className = 'message error';
-                    message.style.display = 'block';
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status} - ${response.statusText}`);
                 }
+                
+                const data = await response.json();
+                console.log('✅ Login başarılı:', data);
+                
+                message.textContent = '✅ Giriş başarılı! Yönlendiriliyorsunuz...';
+                message.className = 'message success';
+                message.style.display = 'block';
+                
+                // Local storage'a kaydet
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Ana uygulamaya yönlendir
+                setTimeout(() => {
+                    window.location.href = 'app.html';
+                }, 1000);
+                
             } catch (error) {
-                message.textContent = '❌ Sunucu hatası: ' + error.message;
+                console.error('❌ Login hatası:', error);
+                
+                message.textContent = '❌ Giriş hatası: ' + error.message;
                 message.className = 'message error';
                 message.style.display = 'block';
+                
             } finally {
-                loading.style.display = 'none';
+                button.disabled = false;
+                button.textContent = '🚀 Giriş Yap';
             }
         }
         
-        document.getElementById('loginForm').addEventListener('submit', login);
-        checkBackend();
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 Route App başlatılıyor...');
+            console.log('📍 Backend URL:', API_URL);
+            
+            // Backend test et
+            testBackend();
+            
+            // Form event listener
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        });
     </script>
 </body>
 </html>
