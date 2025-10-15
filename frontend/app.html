@@ -3,17 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Route App</title>
-    <meta name="theme-color" content="#4CAF50">
-    <link rel="stylesheet" href="css/style.css">
+    <title>Route App - Ana Sayfa</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             background: #f5f5f5;
         }
         .header {
@@ -32,43 +27,26 @@
         }
         .nav button {
             flex: 1;
-            padding: 0.8rem;
+            padding: 1rem;
             border: none;
             background: #f0f0f0;
-            border-radius: 5px;
             cursor: pointer;
         }
         .nav button.active {
             background: #4CAF50;
             color: white;
         }
-        .main {
+        .content {
             padding: 1rem;
             max-width: 800px;
             margin: 0 auto;
         }
         .card {
             background: white;
-            padding: 1rem;
-            border-radius: 5px;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-primary {
-            background: #4CAF50;
-            color: white;
-        }
-        .visit-item {
-            border: 1px solid #ddd;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 5px;
         }
     </style>
 </head>
@@ -76,8 +54,8 @@
     <div class="header">
         <h1>🏢 Route App</h1>
         <div>
-            <span id="userName"></span>
-            <button onclick="logout()" class="btn" style="margin-left: 1rem;">Çıkış</button>
+            <span id="userName">Kullanıcı</span>
+            <button onclick="logout()" style="margin-left: 1rem; padding: 0.5rem 1rem; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Çıkış</button>
         </div>
     </div>
     
@@ -85,16 +63,26 @@
         <button onclick="showPage('dashboard')" class="active">📊 Dashboard</button>
         <button onclick="showPage('visits')">📍 Ziyaretler</button>
         <button onclick="showPage('customers')">👥 Müşteriler</button>
-        <button onclick="showPage('map')">🗺️ Harita</button>
     </nav>
     
-    <main class="main" id="mainContent">
-        <!-- Dashboard içeriği buraya gelecek -->
-    </main>
+    <div class="content" id="content">
+        <div class="card">
+            <h2>Hoş Geldiniz!</h2>
+            <p>Route App başarıyla çalışıyor.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                <div style="background: #e8f5e8; padding: 1rem; border-radius: 5px;">
+                    <h3>Bugünkü Ziyaretler</h3>
+                    <p style="font-size: 2rem; color: #4CAF50; margin: 0;">0</p>
+                </div>
+                <div style="background: #e3f2fd; padding: 1rem; border-radius: 5px;">
+                    <h3>Toplam Müşteriler</h3>
+                    <p style="font-size: 2rem; color: #2196F3; margin: 0;">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const API_URL = 'https://route-app.onrender.com';
-        
         // Sayfa yüklendiğinde
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
@@ -105,98 +93,41 @@
                 return;
             }
             
-            document.getElementById('userName').textContent = user.name || 'Kullanıcı';
-            showDashboard();
+            document.getElementById('userName').textContent = user.name || user.email || 'Kullanıcı';
         });
         
         function showPage(page) {
-            document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+            // Navigasyon butonlarını güncelle
+            document.querySelectorAll('.nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
             event.target.classList.add('active');
             
-            if (page === 'dashboard') showDashboard();
-            if (page === 'visits') showVisits();
-            if (page === 'customers') showCustomers();
-            if (page === 'map') showMap();
-        }
-        
-        function showDashboard() {
-            document.getElementById('mainContent').innerHTML = `
-                <div class="card">
-                    <h2>Hoş Geldiniz!</h2>
-                    <p>Route App'e hoş geldiniz. Soldaki menüden işlemlerinizi yapabilirsiniz.</p>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                        <div style="background: #e8f5e8; padding: 1rem; border-radius: 5px;">
-                            <h3>Bugünkü Ziyaretler</h3>
-                            <p style="font-size: 2rem; color: #4CAF50;">0</p>
-                        </div>
-                        <div style="background: #e3f2fd; padding: 1rem; border-radius: 5px;">
-                            <h3>Toplam Müşteriler</h3>
-                            <p style="font-size: 2rem; color: #2196F3;">0</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        async function showVisits() {
-            try {
-                const response = await fetch(`${API_URL}/api/visits/today`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-                const data = await response.json();
-                
-                let visitsHTML = '';
-                if (data.data && data.data.length > 0) {
-                    visitsHTML = data.data.map(visit => `
-                        <div class="visit-item">
-                            <h3>${visit.customer.name}</h3>
-                            <p>${visit.customer.address}</p>
-                            <p>${visit.customer.phone}</p>
-                            <button class="btn btn-primary">Ziyareti Başlat</button>
-                        </div>
-                    `).join('');
-                } else {
-                    visitsHTML = '<p>Bugün için ziyaret bulunmuyor.</p>';
-                }
-                
-                document.getElementById('mainContent').innerHTML = `
+            // İçeriği değiştir
+            const content = document.getElementById('content');
+            
+            if (page === 'dashboard') {
+                content.innerHTML = `
                     <div class="card">
-                        <h2>Bugünkü Ziyaretler</h2>
-                        ${visitsHTML}
+                        <h2>Dashboard</h2>
+                        <p>Ana sayfa içeriği</p>
                     </div>
                 `;
-            } catch (error) {
-                document.getElementById('mainContent').innerHTML = `
+            } else if (page === 'visits') {
+                content.innerHTML = `
                     <div class="card">
                         <h2>Ziyaretler</h2>
-                        <p>Ziyaretler yüklenirken hata oluştu.</p>
+                        <p>Ziyaret yönetimi sayfası</p>
+                    </div>
+                `;
+            } else if (page === 'customers') {
+                content.innerHTML = `
+                    <div class="card">
+                        <h2>Müşteriler</h2>
+                        <p>Müşteri yönetimi sayfası</p>
                     </div>
                 `;
             }
-        }
-        
-        function showCustomers() {
-            document.getElementById('mainContent').innerHTML = `
-                <div class="card">
-                    <h2>Müşteriler</h2>
-                    <p>Müşteri yönetimi sayfası</p>
-                    <button class="btn btn-primary">Yeni Müşteri Ekle</button>
-                </div>
-            `;
-        }
-        
-        function showMap() {
-            document.getElementById('mainContent').innerHTML = `
-                <div class="card">
-                    <h2>Harita</h2>
-                    <p>Harita görünümü</p>
-                    <div style="height: 400px; background: #eee; display: flex; align-items: center; justify-content: center;">
-                        🗺️ Harita burada gösterilecek
-                    </div>
-                </div>
-            `;
         }
         
         function logout() {
